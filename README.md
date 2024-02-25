@@ -58,7 +58,8 @@ This CDK application deploys an Amazon API Gateway REST API with two methods:
 * GET - Integrates with a Lambda function using proxy
 * POST - Validate and publish the payload to an SNS Topic. The SNS topic fans out these requests to a SQS Queue and to an email.
 
-```Sample Payload
+Sample Payload:
+```
 {
     "name":"TestMessage",
     "category":"Testing",
@@ -66,7 +67,8 @@ This CDK application deploys an Amazon API Gateway REST API with two methods:
 }
 ```
 
-```JsonSchema
+JsonSchema:
+```
 {
     "type": "object",
     "additionalProperties": false,
