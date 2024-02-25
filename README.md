@@ -55,7 +55,7 @@ To do this run the command:
 
 This CDK application deploys an Amazon API Gateway REST API with two methods:
 
-* GET - Integrates with a Lambda function using proxy
+* GET - Integrates with a [Lambda function](lambda/hello.js) using proxy
 * POST - Validate and publish the payload to an SNS Topic. The SNS topic fans out these requests to a SQS Queue and to an email.
 
 Sample Payload:
@@ -67,7 +67,7 @@ Sample Payload:
 }
 ```
 
-JsonSchema:
+[JsonSchema](lib/modules/api-gateway-models.ts) used to validate the payload:
 ```
 {
     "type": "object",
@@ -108,26 +108,45 @@ JsonSchema:
         --stack-name ApiGatewayCdkStack \
         --query "Stacks[0].Outputs[?OutputKey=='CDKTestApiEndpoint'].OutputValue" \
         --output text)
+```
 
+2. Get API Key from stack output
+```
     RESTAPI_APIKEY=$(aws cloudformation describe-stacks \
         --stack-name ApiGatewayCdkStack \
         --query "Stacks[0].Outputs[?OutputKey=='CDKTestApiKeyValue'].OutputValue" \
         --output text)
 ```
 
-2. Send a sample request to the API endpoint
+3. Send a sample request to the API GET endpoint
 ```
     curl -H "Content-Type: application/json" \
         -H "x-api-key: $RESTAPI_APIKEY" \
         -X GET \
         $RESTAPI_ENDPOINT
+```
 
+4. Send a sample request to the API POST endpoint
+```
     curl -H "Content-Type: application/json" \
         -H "x-api-key: $RESTAPI_APIKEY" \
         -X POST \
         -d '{"name": "TestMessage", "category": "Testing", "id": 1}' \
         $RESTAPI_ENDPOINT
 ```
+
+5. Get the SQS Queue Url
+```
+    SQS_QUEUEURL=$(aws sqs get-queue-url \
+        --queue-name CDKTestQueue \
+        --output text)
+```
+
+6. Get the message from SQS
+```
+    aws sqs receive-message --queue-url $SQS_QUEUEURL
+```
+
 
 ## Cleanup
  
