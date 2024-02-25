@@ -34,6 +34,7 @@ export class ApiGatewayCdkStack extends cdk.Stack {
 		apiGateway.addSNSIntegration(apiGateway.root, snsTopic, postModel);
 
 		const outputHelper = new OutputHelper(this);
+		outputHelper.printOut('CDKTestApiEndpoint', apiGateway.url);
 		outputHelper.printOut('CDKTestApiId', apiGateway.restApiId);
 		outputHelper.printOut('CDKTestApiKeyValue', apiGateway.apiKeyValue);
 	}

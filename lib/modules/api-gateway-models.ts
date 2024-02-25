@@ -12,33 +12,29 @@ export class ApiGatewayModels {
 			"type": cdk.aws_apigateway.JsonSchemaType.OBJECT,
 			"additionalProperties": false,
 			"required": [
-				"type"
+				"name",
+				"category",
+				"id"
 			],
 			"properties": {
-				"type": {
+				"name": {
+					"type": cdk.aws_apigateway.JsonSchemaType.STRING,
+					"maxLength": 50,
+					"minLength": 3,
+					"pattern": "^[a-zA-Z0-9]+$"
+				},
+				"category": {
 					"type": cdk.aws_apigateway.JsonSchemaType.STRING,
 					"enum": [
-						"FactSheetUpdatedEvent",
-						"FactSheetCreatedEvent",
-						"FactSheetArchivedEvent",
-						"FactSheetDeletedEvent"
+						"Testing",
+						"Production"
 					]
 				},
-				"factSheet": {
-					"type": cdk.aws_apigateway.JsonSchemaType.OBJECT,
-					"properties": {
-						"type": {
-							"type": cdk.aws_apigateway.JsonSchemaType.STRING,
-							"enum": [
-								"Project",
-								"Application"
-							]
-						}
-					},
-					"required": [
-						"type"
-					]
-				},
+				"id": {
+					"type": cdk.aws_apigateway.JsonSchemaType.INTEGER,
+					"maximum": 100,
+					"minimum": 1
+				}
 			}
 		}
 	}
