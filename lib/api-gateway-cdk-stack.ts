@@ -1,16 +1,40 @@
 import * as cdk from 'aws-cdk-lib';
+
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { ApiGatewayModels } from './modules/api-gateway-models';
+import { ApiHelper, LambdaHelper, SqsHelper, SnsHelper, OutputHelper } from './helpers';
 
 export class ApiGatewayCdkStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+		super(scope, id, props);
+		this.templateOptions.description = 'API Gateway CDK Test';
 
-    // The code that defines your stack goes here
+		const emailSubscription = new cdk.CfnParameter(this, 'emailSubscription');
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'ApiGatewayCdkQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
-  }
+		const tags: Map<string, string> = new Map([
+			['PROJECT', 'CDKTest'],
+			['VERSION', '1']
+		]);
+
+		const apiGateway = ApiHelper.createRestApi(this, 'CDKTestApi', {
+			enableCors: true,
+			tags: tags,
+			requestApiKey: true,
+			description: this.templateOptions.description
+		});
+
+		const lambdaFunction = LambdaHelper.createFunction(this, 'CDKTestLambda', 'hello.handler', tags);
+		apiGateway.addMethod(apiGateway.root, lambdaFunction, 'GET');
+
+		const sqsQueue = SqsHelper.createQueue(this, 'CDKTestQueue', tags);
+		const snsTopic = SnsHelper.createTopicWithSqsSubscription(this, 'CDKTestTopic', sqsQueue, tags);
+		snsTopic.addEmailSubscription(emailSubscription.valueAsString);
+
+		const postModel = apiGateway.addJsonModel(ApiGatewayModels.postModel);
+		apiGateway.addSNSIntegration(apiGateway.root, snsTopic, postModel);
+
+		const outputHelper = new OutputHelper(this);
+		outputHelper.printOut('CDKTestApiId', apiGateway.restApiId);
+		outputHelper.printOut('CDKTestApiKeyValue', apiGateway.apiKeyValue);
+	}
 }
