@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
-
 import { Construct } from 'constructs';
-import { ApiGatewayModels } from './modules/api-gateway-models';
+
+import { RootPost } from './models';
 import { ApiHelper, LambdaHelper, SqsHelper, SnsHelper, OutputHelper } from './helpers';
 
 export class ApiGatewayCdkStack extends cdk.Stack {
@@ -30,7 +30,7 @@ export class ApiGatewayCdkStack extends cdk.Stack {
 		const snsTopic = SnsHelper.createTopicWithSqsSubscription(this, 'CDKTestTopic', sqsQueue, tags);
 		snsTopic.addEmailSubscription(emailSubscription.valueAsString);
 
-		const postModel = apiGateway.addJsonModel(ApiGatewayModels.postModel);
+		const postModel = apiGateway.addJsonModel(RootPost);
 		apiGateway.addSNSIntegration(apiGateway.root, snsTopic, postModel);
 
 		const outputHelper = new OutputHelper(this);

@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { TagHelper } from './tag';
 import { Utility } from '../modules/utility';
-import { ApiGatewayModel } from '../modules/api-gateway-models';
+import { ApiGatewayModel } from '../models/common';
 
 export type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -167,7 +167,7 @@ export class RestApi extends cdk.aws_apigateway.RestApi {
 	}
 
 	addSNSIntegration(resource: cdk.aws_apigateway.IResource, topic: cdk.aws_sns.ITopic, 
-		bodyModel: cdk.aws_apigateway.Model) {
+		bodyModel: cdk.aws_apigateway.Model): cdk.aws_apigateway.Method  {
 		const gatewayExecutionRole = new cdk.aws_iam.Role(this, this.restApiName.concat('-role'), {
 			assumedBy: new cdk.aws_iam.ServicePrincipal('apigateway.amazonaws.com'),
 			managedPolicies: [
@@ -178,7 +178,7 @@ export class RestApi extends cdk.aws_apigateway.RestApi {
 		});
 		topic.grantPublish(gatewayExecutionRole);
 
-		resource.addMethod('POST',
+		return resource.addMethod('POST',
 			new cdk.aws_apigateway.AwsIntegration({
 				service: 'sns',
 				integrationHttpMethod: 'POST',
